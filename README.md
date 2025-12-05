@@ -27,9 +27,9 @@ cd Pin-sensor-side-channel-leak
 python -m venv venv
 
 4. Activate the virtual environment
-# On Windows (PowerShell):
+On Windows (PowerShell):
 venv\Scripts\Activate.ps1
-# On Linux / macOS:
+On Linux / macOS:
 source venv/bin/activate
 
 5. Install required dependencies

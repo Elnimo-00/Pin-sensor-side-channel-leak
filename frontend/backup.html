@@ -1,0 +1,91 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>PIN ML Trainer</title>
+  <style>
+    body { font-family: system-ui; margin: 40px; max-width: 800px; }
+    h1 { color: #0b5; }
+    .section { margin-bottom: 20px; }
+    input, select, button { margin-top: 5px; display: block; padding: 6px; font-size: 14px; }
+    pre { background: #111; color: #0f0; padding: 10px; border-radius: 5px; height: 200px; overflow: auto; }
+  </style>
+</head>
+<body>
+  <h1>PIN Side-Channel ML Web Trainer</h1>
+
+  <div class="section">
+    <h3>Train a new model</h3>
+    <form id="trainForm">
+      <label>Dataset file (label + features):</label>
+      <input type="file" id="trainFile" required>
+      <label>Model type:</label>
+      <select id="modelType">
+        <option value="rf">Random Forest</option>
+        <option value="svm">SVM (RBF)</option>
+        <option value="mlp">Neural Network (MLP)</option>
+      </select>
+      <button type="submit">Train Model</button>
+    </form>
+  </div>
+
+  <div class="section">
+    <h3>Predict with a saved model</h3>
+    <form id="predictForm">
+      <label>Test data file:</label>
+      <input type="file" id="predictFile" required>
+      <label>Model filename (from training result):</label>
+      <input type="text" id="modelName" placeholder="e.g., rf_abc123.joblib" required>
+      <button type="submit">Predict</button>
+    </form>
+  </div>
+
+  <h3>Logs</h3>
+  <pre id="log"></pre>
+
+<script>
+const log = msg => {
+  const el = document.getElementById('log');
+  el.textContent += msg + '\n';
+  el.scrollTop = el.scrollHeight;
+};
+
+document.getElementById('trainForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const file = document.getElementById('trainFile').files[0];
+  const modelType = document.getElementById('modelType').value;
+  if (!file) return alert('Select a dataset file');
+
+  const formData = new FormData();
+  formData.append('file', file);
+  formData.append('model_type', modelType);
+
+  log(`Uploading ${file.name} for training (${modelType})...`);
+  const res = await fetch('http://127.0.0.1:8000/train', {
+    method: 'POST',
+    body: formData
+  });
+  const data = await res.json();
+  log(JSON.stringify(data, null, 2));
+});
+
+document.getElementById('predictForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const file = document.getElementById('predictFile').files[0];
+  const modelName = document.getElementById('modelName').value.trim();
+  if (!file || !modelName) return alert('Select file and model name');
+  const formData = new FormData();
+  formData.append('file', file);
+  formData.append('model_name', modelName);
+
+  log(`Uploading ${file.name} for prediction using ${modelName}...`);
+  const res = await fetch('http://127.0.0.1:8000/predict', {
+    method: 'POST',
+    body: formData
+  });
+  const data = await res.json();
+  log(JSON.stringify(data, null, 2));
+});
+</script>
+</body>
+</html>

@@ -38,5 +38,5 @@ The requirements file is in the backend directory
 pip install -r backend/requirements.txt
 
 6. Start the server with auto‑reload for development from within the backend directory
-'''python
+   
 uvicorn app:app --reload --port 9000
